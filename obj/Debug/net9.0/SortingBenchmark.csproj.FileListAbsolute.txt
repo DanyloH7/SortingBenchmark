@@ -1,0 +1,14 @@
+/Users/danygolov2008gmail.com/Desktop/SortingBenchmark/bin/Debug/net9.0/SortingBenchmark
+/Users/danygolov2008gmail.com/Desktop/SortingBenchmark/bin/Debug/net9.0/SortingBenchmark.deps.json
+/Users/danygolov2008gmail.com/Desktop/SortingBenchmark/bin/Debug/net9.0/SortingBenchmark.runtimeconfig.json
+/Users/danygolov2008gmail.com/Desktop/SortingBenchmark/bin/Debug/net9.0/SortingBenchmark.dll
+/Users/danygolov2008gmail.com/Desktop/SortingBenchmark/bin/Debug/net9.0/SortingBenchmark.pdb
+/Users/danygolov2008gmail.com/Desktop/SortingBenchmark/obj/Debug/net9.0/SortingBenchmark.GeneratedMSBuildEditorConfig.editorconfig
+/Users/danygolov2008gmail.com/Desktop/SortingBenchmark/obj/Debug/net9.0/SortingBenchmark.AssemblyInfoInputs.cache
+/Users/danygolov2008gmail.com/Desktop/SortingBenchmark/obj/Debug/net9.0/SortingBenchmark.AssemblyInfo.cs
+/Users/danygolov2008gmail.com/Desktop/SortingBenchmark/obj/Debug/net9.0/SortingBenchmark.csproj.CoreCompileInputs.cache
+/Users/danygolov2008gmail.com/Desktop/SortingBenchmark/obj/Debug/net9.0/SortingBenchmark.dll
+/Users/danygolov2008gmail.com/Desktop/SortingBenchmark/obj/Debug/net9.0/refint/SortingBenchmark.dll
+/Users/danygolov2008gmail.com/Desktop/SortingBenchmark/obj/Debug/net9.0/SortingBenchmark.pdb
+/Users/danygolov2008gmail.com/Desktop/SortingBenchmark/obj/Debug/net9.0/SortingBenchmark.genruntimeconfig.cache
+/Users/danygolov2008gmail.com/Desktop/SortingBenchmark/obj/Debug/net9.0/ref/SortingBenchmark.dll
