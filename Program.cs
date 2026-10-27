@@ -13,15 +13,15 @@ namespace SortingBenchmark
             int iterations = 10;
             string csvPath = "results.csv";
 
-            // Типи розподілу даних для дослідження
+            // Data distribution scenarios to investigate
             string[] distributions = { "Random", "Sorted", "ReverseSorted" };
 
-            // 1. JIT Warm-up
+            // 1. JIT Warm-up to eliminate compilation overhead on first runs
             WarmUp();
 
             using (StreamWriter writer = new StreamWriter(csvPath))
             {
-                // Оновлюємо заголовок CSV, додаючи колонку розподілу даних
+                // CSV header including the data distribution column
                 writer.WriteLine("RunNo,ArraySize,Distribution,Algorithm,ExecutionTimeMicroseconds");
 
                 Console.WriteLine("=== Benchmark Execution & CSV Export (Data Distributions) ===");
@@ -37,7 +37,7 @@ namespace SortingBenchmark
 
                         for (int i = 0; i < iterations; i++)
                         {
-                            // Генеруємо базовий масив відповідно до типу розподілу
+                            // Generate base array according to the current distribution type
                             int[] baseArray = GenerateArray(size, dist, i);
 
                             // --- 1. Insertion Sort ---
@@ -53,7 +53,7 @@ namespace SortingBenchmark
                             writer.WriteLine($"{i + 1},{size},{dist},QuickSort,{quickTimes[i]:F4}");
                         }
 
-                        // Вивід результатів у консоль
+                        // Output aggregated results to the console
                         Console.WriteLine($"{size,-10} | {dist,-15} | {"Insertion Sort",-15} | {insertionTimes.Average(),-15:F2}");
                         Console.WriteLine($"{size,-10} | {dist,-15} | {"QuickSort",-15} | {quickTimes.Average(),-15:F2}");
                         Console.WriteLine(new string('-', 65));
@@ -64,7 +64,7 @@ namespace SortingBenchmark
             Console.WriteLine($"\n[Success] New results with distributions exported to '{csvPath}'");
         }
 
-        // Генератор масивів залежно від типу розподілу
+        // Generates an array based on the requested distribution type
         static int[] GenerateArray(int size, string distribution, int seedOffset)
         {
             Random rand = new Random(42 + seedOffset);
@@ -79,11 +79,12 @@ namespace SortingBenchmark
                 Array.Sort(array);
                 Array.Reverse(array);
             }
-            // Якщо "Random", залишаємо як є
+            // If "Random", leave the array unsorted
 
             return array;
         }
 
+        // Triggers JIT compilation and CPU instruction caching beforehand
         static void WarmUp()
         {
             int[] dummy = { 5, 2, 8, 1, 9 };
@@ -91,6 +92,7 @@ namespace SortingBenchmark
             QuickSort((int[])dummy.Clone(), 0, dummy.Length - 1);
         }
 
+        // Measures sorting duration with high precision; scales iterations for small N
         static double MeasureSortingTime(Action sortAction, int size)
         {
             int repeatCount = (size <= 10) ? 1000 : 1;
@@ -151,6 +153,7 @@ namespace SortingBenchmark
             return i + 1;
         }
 
+        // Verifies correctness of the sorting algorithm
         static bool IsSorted(int[] array)
         {
             for (int i = 0; i < array.Length - 1; i++)
