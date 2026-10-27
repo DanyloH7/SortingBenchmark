@@ -13,52 +13,77 @@ namespace SortingBenchmark
             int iterations = 10;
             string csvPath = "results.csv";
 
-            // 1. JIT Warm-up (Прогрів JIT-компілятора та кешу)
+            // Типи розподілу даних для дослідження
+            string[] distributions = { "Random", "Sorted", "ReverseSorted" };
+
+            // 1. JIT Warm-up
             WarmUp();
 
             using (StreamWriter writer = new StreamWriter(csvPath))
             {
-                writer.WriteLine("RunNo,ArraySize,Algorithm,ExecutionTimeMicroseconds");
+                // Оновлюємо заголовок CSV, додаючи колонку розподілу даних
+                writer.WriteLine("RunNo,ArraySize,Distribution,Algorithm,ExecutionTimeMicroseconds");
 
-                Console.WriteLine("=== Benchmark Execution & CSV Export (Mac M4) ===");
-                Console.WriteLine($"{"Array Size (N)",-15} | {"Algorithm",-15} | {"Avg Time (µs)",-15} | {"Min Time (µs)",-15}");
-                Console.WriteLine(new string('-', 70));
+                Console.WriteLine("=== Benchmark Execution & CSV Export (Data Distributions) ===");
+                Console.WriteLine($"{"Size (N)",-10} | {"Distribution",-15} | {"Algorithm",-15} | {"Avg Time (µs)",-15}");
+                Console.WriteLine(new string('-', 65));
 
                 foreach (int size in sizes)
                 {
-                    double[] insertionTimes = new double[iterations];
-                    double[] quickTimes = new double[iterations];
-
-                    for (int i = 0; i < iterations; i++)
+                    foreach (string dist in distributions)
                     {
-                        // Використовуємо seed = 42 + i, щоб кожен прогін мав однаковий, але унікальний масив
-                        Random rand = new Random(42 + i);
-                        int[] baseArray = Enumerable.Range(0, size).Select(_ => rand.Next()).ToArray();
+                        double[] insertionTimes = new double[iterations];
+                        double[] quickTimes = new double[iterations];
 
-                        // --- 1. Insertion Sort ---
-                        int[] arrInsert = (int[])baseArray.Clone();
-                        insertionTimes[i] = MeasureSortingTime(() => InsertionSort(arrInsert), size);
-                        if (!IsSorted(arrInsert)) throw new Exception("InsertionSort failed validation!");
-                        writer.WriteLine($"{i + 1},{size},InsertionSort,{insertionTimes[i]:F4}");
+                        for (int i = 0; i < iterations; i++)
+                        {
+                            // Генеруємо базовий масив відповідно до типу розподілу
+                            int[] baseArray = GenerateArray(size, dist, i);
 
-                        // --- 2. QuickSort ---
-                        int[] arrQuick = (int[])baseArray.Clone();
-                        quickTimes[i] = MeasureSortingTime(() => QuickSort(arrQuick, 0, arrQuick.Length - 1), size);
-                        if (!IsSorted(arrQuick)) throw new Exception("QuickSort failed validation!");
-                        writer.WriteLine($"{i + 1},{size},QuickSort,{quickTimes[i]:F4}");
+                            // --- 1. Insertion Sort ---
+                            int[] arrInsert = (int[])baseArray.Clone();
+                            insertionTimes[i] = MeasureSortingTime(() => InsertionSort(arrInsert), size);
+                            if (!IsSorted(arrInsert)) throw new Exception("InsertionSort failed validation!");
+                            writer.WriteLine($"{i + 1},{size},{dist},InsertionSort,{insertionTimes[i]:F4}");
+
+                            // --- 2. QuickSort ---
+                            int[] arrQuick = (int[])baseArray.Clone();
+                            quickTimes[i] = MeasureSortingTime(() => QuickSort(arrQuick, 0, arrQuick.Length - 1), size);
+                            if (!IsSorted(arrQuick)) throw new Exception("QuickSort failed validation!");
+                            writer.WriteLine($"{i + 1},{size},{dist},QuickSort,{quickTimes[i]:F4}");
+                        }
+
+                        // Вивід результатів у консоль
+                        Console.WriteLine($"{size,-10} | {dist,-15} | {"Insertion Sort",-15} | {insertionTimes.Average(),-15:F2}");
+                        Console.WriteLine($"{size,-10} | {dist,-15} | {"QuickSort",-15} | {quickTimes.Average(),-15:F2}");
+                        Console.WriteLine(new string('-', 65));
                     }
-
-                    // Вивід результатів у консоль
-                    Console.WriteLine($"{size,-15} | {"Insertion Sort",-15} | {insertionTimes.Average(),-15:F2} | {insertionTimes.Min(),-15:F2}");
-                    Console.WriteLine($"{size,-15} | {"QuickSort",-15} | {quickTimes.Average(),-15:F2} | {quickTimes.Min(),-15:F2}");
-                    Console.WriteLine(new string('-', 70));
                 }
             }
 
-            Console.WriteLine($"\n[Success] Raw data successfully exported to '{csvPath}'");
+            Console.WriteLine($"\n[Success] New results with distributions exported to '{csvPath}'");
         }
 
-        // Метод прогріву JIT
+        // Генератор масивів залежно від типу розподілу
+        static int[] GenerateArray(int size, string distribution, int seedOffset)
+        {
+            Random rand = new Random(42 + seedOffset);
+            int[] array = Enumerable.Range(0, size).Select(_ => rand.Next()).ToArray();
+
+            if (distribution == "Sorted")
+            {
+                Array.Sort(array);
+            }
+            else if (distribution == "ReverseSorted")
+            {
+                Array.Sort(array);
+                Array.Reverse(array);
+            }
+            // Якщо "Random", залишаємо як є
+
+            return array;
+        }
+
         static void WarmUp()
         {
             int[] dummy = { 5, 2, 8, 1, 9 };
@@ -66,21 +91,17 @@ namespace SortingBenchmark
             QuickSort((int[])dummy.Clone(), 0, dummy.Length - 1);
         }
 
-        // Вимірювання часу з урахуванням малого N
         static double MeasureSortingTime(Action sortAction, int size)
         {
-            // Якщо N = 10, виконуємо 1000 повторень для точності заміру
             int repeatCount = (size <= 10) ? 1000 : 1;
 
             Stopwatch sw = Stopwatch.StartNew();
             for (int r = 0; r < repeatCount; r++)
             {
-                // Для циклу повторень потрібна копія (лише для повторів)
                 sortAction();
             }
             sw.Stop();
 
-            // Повертаємо час у мікросекундах за ОДНЕ сортування
             double totalMicroseconds = (sw.Elapsed.TotalMilliseconds * 1000.0);
             return totalMicroseconds / repeatCount;
         }
