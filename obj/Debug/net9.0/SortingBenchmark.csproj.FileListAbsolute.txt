@@ -12,3 +12,4 @@
 /Users/danygolov2008gmail.com/Desktop/SortingBenchmark/obj/Debug/net9.0/SortingBenchmark.pdb
 /Users/danygolov2008gmail.com/Desktop/SortingBenchmark/obj/Debug/net9.0/SortingBenchmark.genruntimeconfig.cache
 /Users/danygolov2008gmail.com/Desktop/SortingBenchmark/obj/Debug/net9.0/ref/SortingBenchmark.dll
+/Users/danygolov2008gmail.com/Desktop/SortingBenchmark/obj/Debug/net9.0/SortingBenchmark.sourcelink.json
