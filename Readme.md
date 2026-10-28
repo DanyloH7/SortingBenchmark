@@ -72,3 +72,25 @@ Below is the aggregated average execution time ($\mu s$) across different data d
 dotnet run
 ```
 2.Raw microsecond measurements will be written to results.csv.
+---
+
+## Methodology Highlights & Fixes
+* **Array Cloning for Data Distributions:** To ensure that data distributions (`Random`, `Sorted`, `ReverseSorted`) remain intact across multi-iteration benchmark loops (especially for small array sizes like $N=10$ where execution is scaled), a fresh deep copy (`.Clone()`) of the reference array is instantiated prior to each individual sorting invocation. This prevents sorting already-sorted data in subsequent iterations.
+* **JIT Warm-up:** Executed a preliminary warm-up pass outside the high-precision timer (`Stopwatch`) to eliminate .NET JIT compilation overhead.
+* **Validation:** Correctness of both algorithms is strictly verified using an `IsSorted` check prior to recording performance data.
+
+## Final Benchmark Results (Summary)
+
+| Size ($N$) | Distribution | Insertion Sort (µs) | QuickSort (µs) | Summary Note |
+| :--- | :--- | :--- | :--- | :--- |
+| **10** | Random | ~0.11 | ~0.18 | Comparable overhead |
+| **10** | Sorted | ~0.06 | ~0.23 | Insertion sort advantage |
+| **1000** | Random | ~421.49 | ~52.97 | QuickSort scales better |
+| **1000** | Sorted | ~2.90 | ~2,226.38 | QuickSort $O(n^2)$ drop |
+| **10000** | Random | ~38,742.72 | ~851.29 | Massive QuickSort lead |
+| **10000** | Sorted | ~21.92 | ~136,239.88 | Severe QuickSort bottleneck |
+
+### Key Observations:
+* **Small Workloads ($N=10$):** Both algorithms perform similarly, with negligible overhead differences.
+* **Random Data:** QuickSort significantly outperforms Insertion Sort as array sizes grow ($N \ge 1000$).
+* **Sorted / Reverse-Sorted Data:** Insertion Sort demonstrates optimal linear efficiency ($O(n)$), whereas QuickSort with a fixed pivot suffers from severe worst-case degradation ($O(n^2)$).
