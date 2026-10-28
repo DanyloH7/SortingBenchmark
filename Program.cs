@@ -41,15 +41,23 @@ namespace SortingBenchmark
                             int[] baseArray = GenerateArray(size, dist, i);
 
                             // --- 1. Insertion Sort ---
-                            int[] arrInsert = (int[])baseArray.Clone();
-                            insertionTimes[i] = MeasureSortingTime(() => InsertionSort(arrInsert), size);
-                            if (!IsSorted(arrInsert)) throw new Exception("InsertionSort failed validation!");
+                            // Validate correctness on a separate check clone
+                            int[] checkInsert = (int[])baseArray.Clone();
+                            InsertionSort(checkInsert);
+                            if (!IsSorted(checkInsert)) throw new Exception("InsertionSort failed validation!");
+
+                            // Measure time with fresh cloning per repetition (fixes the instructor's feedback)
+                            insertionTimes[i] = MeasureSortingTime(baseArray, arr => InsertionSort(arr), size);
                             writer.WriteLine($"{i + 1},{size},{dist},InsertionSort,{insertionTimes[i]:F4}");
 
                             // --- 2. QuickSort ---
-                            int[] arrQuick = (int[])baseArray.Clone();
-                            quickTimes[i] = MeasureSortingTime(() => QuickSort(arrQuick, 0, arrQuick.Length - 1), size);
-                            if (!IsSorted(arrQuick)) throw new Exception("QuickSort failed validation!");
+                            // Validate correctness on a separate check clone
+                            int[] checkQuick = (int[])baseArray.Clone();
+                            QuickSort(checkQuick, 0, checkQuick.Length - 1);
+                            if (!IsSorted(checkQuick)) throw new Exception("QuickSort failed validation!");
+
+                            // Measure time with fresh cloning per repetition
+                            quickTimes[i] = MeasureSortingTime(baseArray, arr => QuickSort(arr, 0, arr.Length - 1), size);
                             writer.WriteLine($"{i + 1},{size},{dist},QuickSort,{quickTimes[i]:F4}");
                         }
 
@@ -92,15 +100,17 @@ namespace SortingBenchmark
             QuickSort((int[])dummy.Clone(), 0, dummy.Length - 1);
         }
 
-        // Measures sorting duration with high precision; scales iterations for small N
-        static double MeasureSortingTime(Action sortAction, int size)
+        // Measures sorting duration with high precision; scales iterations for small N and clones fresh per repeat
+        static double MeasureSortingTime(int[] baseArray, Action<int[]> sortAction, int size)
         {
             int repeatCount = (size <= 10) ? 1000 : 1;
 
             Stopwatch sw = Stopwatch.StartNew();
             for (int r = 0; r < repeatCount; r++)
             {
-                sortAction();
+                // CRITICAL FIX: Fresh clone on each repeat iteration so data distribution remains intact
+                int[] workArray = (int[])baseArray.Clone();
+                sortAction(workArray);
             }
             sw.Stop();
 
